@@ -28,6 +28,29 @@ def test_analyze_hazard_endpoint_success() -> None:
         assert "चेतावनी" in data["translated_warning"]
 
 
+def test_analyze_hazard_markdown_wrapped_response() -> None:
+    """Verify that response wrapped in markdown code fence is cleaned and parsed properly."""
+    mock_response = MagicMock()
+    mock_response.text = (
+        "```json\n"
+        '{\n  "severity_level": "High",\n  "first_aid_steps": ["Shut off gas line", "Evacuate area"],\n  '
+        '"translated_warning": "Warning: Gas leak detected."\n}\n'
+        "```"
+    )
+
+    with patch("services.gemini_client.client.aio.models.generate_content", new=AsyncMock(return_value=mock_response)):
+        payload = {
+            "description": "Smell of natural gas in physics lab",
+            "language": "English",
+        }
+        response = client.post("/api/analyze-hazard", json=payload)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["severity_level"] == "High"
+        assert len(data["first_aid_steps"]) == 2
+        assert data["translated_warning"] == "Warning: Gas leak detected."
+
+
 def test_analyze_hazard_multimodal_image_input() -> None:
     """Verify that multimodal incident report with base64 image is processed successfully."""
     mock_response = MagicMock()

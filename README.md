@@ -7,7 +7,7 @@ During campus emergencies, individuals face critical communication barriers, pan
 
 ## Chosen Vertical
 **Health & Safety (Multimodal Campus Emergency Response)**
-Focused on immediate, zero-latency first-aid guidance, AI-assisted multimodal triage of complex hazards (chemical spills, burns, electrical risks), and streamlined emergency dispatch routing for educational and institutional campuses.
+Focused on immediate, zero-latency first-aid guidance, AI-assisted multimodal triage of complex hazards (chemical spills, burns, electrical risks), and streamlined emergency WhatsApp dispatch routing (+91 8250666852 / 112) for educational and institutional campuses.
 
 ---
 
@@ -18,13 +18,13 @@ The solution implements a **3-Tier Hybrid Resilient Architecture**:
    - Hardcoded, verified first-aid protocols for the top 5 campus emergencies (Cuts & Severe Bleeding, Thermal Burns, Chemical Exposure, Electric Shock, and Fainting).
    - Rendered locally in the browser with immediate localized translation support, guaranteeing instant guidance even during intermittent network drops.
 
-2. **Tier 2: Multimodal AI Hazard Engine (Gemini 3.7 Flash)**
-   - When unexpected or multi-factor hazards occur (e.g., unlabeled chemical spills, composite burns, equipment fires), users can supply photo evidence and incident descriptions.
+2. **Tier 2: AI Hazard Triage (Gemini 3.7 Flash)**
+   - When unexpected or multi-factor hazards occur (e.g., chemical spills, burns, laboratory equipment hazards), users can supply photo evidence and incident descriptions.
    - The backend utilizes the official `google-genai` SDK with `gemini-3.7-flash`, enforcing strictly typed structured JSON schemas (`SafetyProtocol`) via `response_schema` in `types.GenerateContentConfig`.
-   - Every AI request is wrapped in asynchronous timeouts with a deterministic fallback protocol to guarantee that the system never crashes or hangs during life-critical situations.
+   - Every AI request is wrapped in asynchronous timeouts with a deterministic fallback protocol referencing national emergency helpline 112.
 
-3. **Tier 3: Simulated Campus SOS Dispatch Gateway**
-   - Direct emergency dispatch trigger binding current campus location coordinates and ISO timestamps to generate tracked emergency tickets (`SOS-XXXXXXXX`) for campus security and emergency medical response teams.
+3. **Tier 3: Instant WhatsApp SOS Dispatch Gateway**
+   - Direct emergency dispatch trigger binding current campus location coordinates and ISO timestamps to generate tracked emergency tickets (`SOS-XXXXXXXX`) and instant pre-filled WhatsApp emergency alerts to **+91 8250666852**.
 
 ---
 
@@ -33,8 +33,8 @@ The solution implements a **3-Tier Hybrid Resilient Architecture**:
 ### User & Interaction Flow
 1. **Language Selection:** The user selects their preferred language from the global switcher. The entire interface—including headers, labels, buttons, and first-aid instructions—dynamically translates into the selected language (English, Hindi, Bengali, Marathi, Telugu, Tamil, or Gujarati).
 2. **Instant First-Aid Triage:** Clicking any Quick Help category immediately displays structured, numbered action steps, severity levels, and explicit safety precautions.
-3. **Multimodal Incident Analysis:** The user takes or uploads a photo of a safety hazard along with an optional text description. The backend parses the image into bytes, analyzes visual and textual context with Gemini, and returns structured first-aid steps along with translated emergency warnings.
-4. **Emergency SOS Trigger:** In severe situations, hitting the high-contrast **DISPATCH SOS ALERT** button immediately triggers the emergency routing gateway, confirming dispatch status and ticket reference.
+3. **AI Hazard Triage:** The user uploads a photo of a safety hazard or enters an incident description. Gemini analyzes multimodal context and returns structured first-aid steps along with translated emergency warnings and an instant WhatsApp SOS button.
+4. **Emergency SOS Trigger:** Hitting the high-contrast **DISPATCH SOS TO WHATSAPP** button immediately triggers the emergency routing gateway, logging the dispatch ticket and opening WhatsApp with a pre-filled emergency message to **+91 8250666852**.
 
 ### API Architecture
 | Method | Endpoint | Description | Status Code |
@@ -48,8 +48,8 @@ The solution implements a **3-Tier Hybrid Resilient Architecture**:
 
 ## Any Assumptions Made
 1. **Resilience Over Connectivity:** In crisis situations, internet connectivity may be degraded. The core first-aid protocols are hosted locally with zero external network reliance.
-2. **Deterministic Fallbacks:** AI systems can occasionally encounter rate limits or network degradation. The backend is designed with strict 10-second timeouts and automatic fallback to safe standard hazard procedures.
-3. **Pre-configured Dispatch Endpoints:** Campus facilities and security departments are assumed to ingest standardized SOS payload objects containing location strings and timestamp metadata.
+2. **Deterministic Fallbacks:** AI systems can occasionally encounter rate limits or network degradation. The backend is designed with strict 10-second timeouts and automatic fallback referencing emergency helpline 112.
+3. **Emergency Routing:** Campus security and first responders monitor the designated emergency line (+91 8250666852) and national helpline (112).
 4. **Language Inclusivity:** Multilingual support covers the primary languages spoken across diverse Indian university campuses.
 
 ---

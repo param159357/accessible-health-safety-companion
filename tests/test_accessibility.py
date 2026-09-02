@@ -39,7 +39,7 @@ def test_accessibility_interactive_controls_and_labels() -> None:
     assert '<label for="hazard-image-input"' in html
 
     # Button aria labels and descriptors
-    assert 'aria-label="Trigger Campus Emergency SOS Dispatch"' in html
+    assert 'aria-label="Trigger Campus Emergency SOS Dispatch via WhatsApp"' in html
     assert 'aria-controls="protocol-viewer"' in html
     assert 'aria-label="Remove uploaded hazard image"' in html
 

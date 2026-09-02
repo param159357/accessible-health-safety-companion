@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Accessible Multimodal Health & Safety Companion for campus emergencies, rapid first-aid protocols, multimodal AI hazard analysis, and SOS dispatch.">
+  <meta name="description" content="Accessible Multimodal Health & Safety Companion for campus emergencies, rapid first-aid protocols, multimodal AI hazard triage, and WhatsApp SOS dispatch.">
   <title>Accessible Multimodal Health & Safety Companion</title>
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="/css/style.css">
@@ -20,10 +20,10 @@
   <script src="/js/app.js" defer></script>
 </head>
 <body>
-  <!-- Decorative WebGL Canvas -->
+  <!-- Decorative WebGL Background Canvas -->
   <canvas id="bg-canvas" aria-hidden="true" tabindex="-1"></canvas>
 
-  <!-- Live Announcer for Screen Readers -->
+  <!-- Live Announcer for Assistive Tech / Screen Readers -->
   <div id="sr-announcements" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
 
   <!-- Main Application Wrapper -->
@@ -31,10 +31,17 @@
     <header class="app-header" role="banner">
       <div class="header-inner">
         <div class="brand-group">
-          <div class="brand-icon" aria-hidden="true">🛡️</div>
+          <div class="brand-badge-icon" aria-hidden="true">
+            <span class="pulse-ring"></span>
+            🛡️
+          </div>
           <div>
+            <div class="system-status-indicator" aria-hidden="true">
+              <span class="status-dot"></span>
+              <span class="status-text" data-i18n="system_status">CAMPUS EMERGENCY RESPONSE SYSTEM • LIVE 24/7</span>
+            </div>
             <h1 class="brand-title" data-i18n="brand_title">Accessible Multimodal Health & Safety Companion</h1>
-            <p class="brand-subtitle" data-i18n="brand_subtitle">Rapid First-Aid Protocols & Campus Emergency Dispatch</p>
+            <p class="brand-subtitle" data-i18n="brand_subtitle">Rapid First-Aid Protocols & Instant WhatsApp SOS Dispatch (112 / +91 8250666852)</p>
           </div>
         </div>
 
@@ -42,7 +49,7 @@
           <div class="language-picker-group">
             <label for="language-select" class="language-label">
               <span class="lang-icon" aria-hidden="true">🌐</span>
-              <span id="lang-select-label-text" data-i18n="lang_label">Select Language:</span>
+              <span id="lang-select-label-text" data-i18n="lang_label">Language:</span>
             </label>
             <select id="language-select" class="language-select" aria-describedby="lang-desc">
               <option value="English" selected>English</option>
@@ -67,7 +74,16 @@
           <div class="sos-info">
             <div class="sos-tag" data-i18n="sos_tag" aria-hidden="true">🚨 IMMEDIATE ASSISTANCE</div>
             <h2 id="sos-section-title" class="sos-title" data-i18n="sos_title">Campus Emergency SOS Dispatch</h2>
-            <p class="sos-desc" data-i18n="sos_desc">Direct line to Campus Security, EMS, and First Responders. Use when immediate on-site response is required.</p>
+            <p class="sos-desc" data-i18n="sos_desc">Direct emergency line to Campus Security, EMS, and First Responders via WhatsApp (+91 8250666852) and Helpline 112.</p>
+            
+            <!-- Quick Location Selection Chips -->
+            <div class="quick-location-chips" role="group" aria-label="Quick Campus Location Selection">
+              <span class="chip-label" data-i18n="quick_location_label">Quick Pick:</span>
+              <button type="button" class="location-chip" data-loc="🔬 Chemistry Lab Block - Room 302">🔬 Chemistry Lab 302</button>
+              <button type="button" class="location-chip" data-loc="📚 Central Library - 2nd Floor">📚 Central Library</button>
+              <button type="button" class="location-chip" data-loc="🏢 Student Hostel Block A">🏢 Hostel Block A</button>
+              <button type="button" class="location-chip" data-loc="🍽️ Main Campus Cafeteria">🍽️ Cafeteria</button>
+            </div>
           </div>
           
           <div class="sos-action-box">
@@ -92,11 +108,11 @@
               type="button" 
               id="sos-trigger-btn" 
               class="sos-button" 
-              aria-label="Trigger Campus Emergency SOS Dispatch"
+              aria-label="Trigger Campus Emergency SOS Dispatch via WhatsApp"
             >
-              <span class="sos-pulse" aria-hidden="true"></span>
-              <span class="sos-icon" aria-hidden="true">🆘</span>
-              <span class="sos-button-text" data-i18n="sos_btn_text">DISPATCH SOS ALERT</span>
+              <span class="sos-pulse-anim" aria-hidden="true"></span>
+              <span class="sos-icon" aria-hidden="true">🚨</span>
+              <span class="sos-button-text" data-i18n="sos_btn_text">DISPATCH SOS TO WHATSAPP</span>
             </button>
           </div>
         </div>
@@ -110,7 +126,7 @@
       <!-- Section 1: Quick Help Grid (Zero-Latency Local First-Aid) -->
       <section id="quick-help-section" class="card quick-help-card" aria-labelledby="quick-help-title">
         <div class="section-header">
-          <div class="section-icon" aria-hidden="true">⚡</div>
+          <div class="section-icon-badge" aria-hidden="true">⚡</div>
           <div>
             <h2 id="quick-help-title" class="section-title" data-i18n="quick_help_title">Instant Quick-Help First-Aid Protocols</h2>
             <p class="section-subtitle" data-i18n="quick_help_subtitle">Zero-latency, verified emergency steps for immediate campus hazards. Select an emergency below:</p>
@@ -166,18 +182,27 @@
             <p data-i18n="protocol_placeholder">Select any emergency button above to load instant, step-by-step first-aid protocols with safety precautions.</p>
           </div>
           <div id="protocol-content" class="protocol-content hidden">
-            <!-- Rendered dynamically -->
+            <!-- Rendered dynamically via JS -->
           </div>
         </div>
       </section>
 
-      <!-- Section 2: AI Multimodal Hazard Assistant -->
+      <!-- Section 2: AI Hazard Triage Assistant -->
       <section id="ai-assistant-section" class="card ai-card" aria-labelledby="ai-assistant-title">
         <div class="section-header">
-          <div class="section-icon" aria-hidden="true">🤖</div>
+          <div class="section-icon-badge ai-icon-badge" aria-hidden="true">🤖</div>
           <div>
-            <h2 id="ai-assistant-title" class="section-title" data-i18n="ai_title">Multimodal AI Hazard Assessment</h2>
+            <h2 id="ai-assistant-title" class="section-title" data-i18n="ai_title">AI Hazard Triage</h2>
+            <p class="section-subtitle" data-i18n="ai_subtitle">Interactive multimodal assistant. Describe what happened or attach a photo for immediate analysis & emergency WhatsApp routing.</p>
           </div>
+        </div>
+
+        <!-- Quick Hazard Prompt Chips -->
+        <div class="quick-prompt-chips" role="group" aria-label="Suggested Emergency Scenarios">
+          <span class="chip-label" data-i18n="quick_scenario_label">Quick Scenario:</span>
+          <button type="button" class="prompt-chip" data-prompt="A beaker of concentrated hydrochloric acid broke and splashed onto a student's forearm. The area is red, burning, and painful.">🧪 Acid Splash on Forearm</button>
+          <button type="button" class="prompt-chip" data-prompt="Student touched an open electrical wire in the electronics lab and collapsed unconscious.">⚡ Electrical Wire Shock</button>
+          <button type="button" class="prompt-chip" data-prompt="Accidental deep glass cut on hand from broken test tube with continuous bleeding.">🩸 Deep Glass Laceration</button>
         </div>
 
         <form id="hazard-form" class="hazard-form" novalidate>
@@ -204,7 +229,7 @@
             <div class="form-group">
               <label for="hazard-image-input" class="form-label">
                 <span data-i18n="photo_label">Hazard Photo Upload:</span>
-                <span class="optional-indicator" data-i18n="photo_optional">(PNG, JPEG, WebP - max 10MB)</span>
+                <span class="optional-indicator" data-i18n="photo_optional">(PNG, JPEG, WebP - max 5MB)</span>
               </label>
               <div class="image-upload-wrapper">
                 <input 
@@ -224,7 +249,8 @@
             <!-- Submit Button and Loading State -->
             <div class="form-actions">
               <button type="submit" id="analyze-submit-btn" class="submit-button">
-                <span class="btn-text" data-i18n="analyze_btn">Analyze Hazard & Generate Protocol</span>
+                <span class="btn-icon" aria-hidden="true">🔍</span>
+                <span class="btn-text" data-i18n="analyze_btn">Analyze Hazard & Triage Protocol</span>
                 <span class="btn-spinner hidden" id="form-spinner" aria-hidden="true"></span>
               </button>
             </div>
@@ -238,7 +264,7 @@
         </div>
 
         <!-- AI Protocol Output Container -->
-        <div id="ai-result-container" class="ai-result-container hidden" aria-live="polite" role="region" aria-label="AI Hazard Assessment Results">
+        <div id="ai-result-container" class="ai-result-container hidden" aria-live="polite" role="region" aria-label="AI Hazard Triage Results">
           <!-- Populated dynamically via JS -->
         </div>
       </section>
@@ -247,11 +273,16 @@
 
     <footer class="app-footer" role="contentinfo">
       <div class="footer-inner">
+        <div class="footer-emergency-contacts">
+          <span class="contact-item">🚨 <strong>National Emergency:</strong> Dial <a href="tel:112" class="emergency-link">112</a></span>
+          <span class="contact-divider" aria-hidden="true">•</span>
+          <span class="contact-item">📱 <strong>Campus WhatsApp Dispatch:</strong> <a href="https://wa.me/918250666852" target="_blank" rel="noopener noreferrer" class="emergency-link">+91 8250666852</a></span>
+        </div>
         <p class="footer-copy" data-i18n="footer_copy">
           <strong>Campus Health & Safety System</strong> &bull; Accessible Multimodal First-Aid Companion &bull; Built for Rapid Emergency Response
         </p>
         <p class="footer-disclaimer" data-i18n="footer_disclaimer">
-          Emergency Disclaimer: This companion simulates triage and provides automated guidance. In life-threatening emergencies, always notify emergency services directly.
+          Emergency Disclaimer: This companion simulates triage and provides automated guidance. In life-threatening emergencies, always dial 112 or alert emergency responders immediately.
         </p>
       </div>
     </footer>
