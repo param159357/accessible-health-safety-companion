@@ -111,7 +111,7 @@ def test_analyze_hazard_service_direct_execution() -> None:
 
 def test_analyze_hazard_endpoint_catastrophic_failure_500() -> None:
     """Verify that an unexpected server exception returns generic 500 error without stack traces."""
-    with patch("main.analyze_hazard", new=AsyncMock(side_effect=Exception("Critical system error"))):
+    with patch("routers.hazard_router.analyze_hazard", new=AsyncMock(side_effect=Exception("Critical system error"))):
         payload = {"description": "Gas leak"}
         response = client.post("/api/analyze-hazard", json=payload)
         assert response.status_code == 500

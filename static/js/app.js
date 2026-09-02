@@ -362,7 +362,7 @@
   }
 
   /**
-   * Initialize decorative Three.js ambient background particles.
+   * Initialize decorative Three.js ambient background particles with optimized frame throttling.
    */
   function initDecorativeWebGL() {
     if (!window.THREE || !elements.bgCanvas) return;
@@ -376,23 +376,23 @@
       const renderer = new THREE.WebGLRenderer({
         canvas: elements.bgCanvas,
         alpha: true,
-        antialias: true,
+        antialias: false,
         powerPreference: 'low-power',
       });
       renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
       // Create soft, micro circular particles for a clean, non-obtrusive ambient glow
-      const particleCount = 60;
+      const particleCount = 50;
       const geometry = new THREE.BufferGeometry();
       const positions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
 
       const colorPalette = [
-        new THREE.Color('#3b82f6'), // Soft Blue
-        new THREE.Color('#0284c7'), // Sky Blue
-        new THREE.Color('#64748b'), // Slate
-        new THREE.Color('#ef4444'), // Red alert accent
+        new THREE.Color('#3b82f6'),
+        new THREE.Color('#0284c7'),
+        new THREE.Color('#64748b'),
+        new THREE.Color('#ef4444'),
       ];
 
       for (let i = 0; i < particleCount; i++) {
@@ -409,7 +409,6 @@
       geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
       geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-      // Use a subtle circular point particle texture via canvas
       const dotCanvas = document.createElement('canvas');
       dotCanvas.width = 16;
       dotCanvas.height = 16;
@@ -434,22 +433,29 @@
       const particleSystem = new THREE.Points(geometry, material);
       scene.add(particleSystem);
 
-      function renderLoop() {
+      let lastFrameTime = 0;
+      const fpsInterval = 1000 / 30; // Throttle to 30 FPS for battery & CPU efficiency
+
+      function renderLoop(currentTime) {
         if (!state.isThreeJsPaused && !prefersReducedMotion) {
-          particleSystem.rotation.y += 0.0004;
-          particleSystem.rotation.x += 0.0002;
-          renderer.render(scene, camera);
+          const elapsed = currentTime - lastFrameTime;
+          if (elapsed > fpsInterval) {
+            lastFrameTime = currentTime - (elapsed % fpsInterval);
+            particleSystem.rotation.y += 0.0004;
+            particleSystem.rotation.x += 0.0002;
+            renderer.render(scene, camera);
+          }
         }
         requestAnimationFrame(renderLoop);
       }
 
       if (!prefersReducedMotion) {
-        renderLoop();
+        requestAnimationFrame(renderLoop);
       } else {
         renderer.render(scene, camera);
       }
 
-      // Visibility Change Handler - Pause render loop when hidden
+      // Visibility & Sleep Handlers
       document.addEventListener('visibilitychange', () => {
         state.isThreeJsPaused = document.hidden;
       });
@@ -508,7 +514,6 @@
         state.protocols = data.protocols || [];
       }
     } catch (e) {
-      // Fallback inline protocols in case file fetch fails
       state.protocols = [
         {
           id: 'cuts_bleeding',
@@ -609,9 +614,55 @@
   }
 
   /**
-   * Handle image file selection and conversion to base64.
+   * Client-side canvas compression: Resizes and compresses image before base64 encoding to reduce upload payload by >90%.
+   * @param {File} file
+   * @returns {Promise<string>}
    */
-  function handleImageUpload(e) {
+  function compressImageToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDimension = 1280;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            } else {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(e.target.result);
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+          resolve(compressedDataUrl);
+        };
+        img.onerror = () => resolve(e.target.result);
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /**
+   * Handle image file selection with client-side canvas optimization.
+   */
+  async function handleImageUpload(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
 
@@ -627,14 +678,16 @@
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      state.uploadedImageBase64 = event.target.result;
-      elements.imagePreview.src = event.target.result;
+    try {
+      const compressedDataUrl = await compressImageToDataUrl(file);
+      state.uploadedImageBase64 = compressedDataUrl;
+      elements.imagePreview.src = compressedDataUrl;
       elements.imagePreviewWrapper.classList.remove('hidden');
-      announceToScreenReader('Hazard photo attached successfully.');
-    };
-    reader.readAsDataURL(file);
+      announceToScreenReader('Hazard photo attached and optimized successfully.');
+    } catch (err) {
+      alert('Failed to process image file.');
+      elements.hazardImageInput.value = '';
+    }
   }
 
   /**
@@ -646,6 +699,15 @@
     elements.imagePreview.src = '';
     elements.imagePreviewWrapper.classList.add('hidden');
     announceToScreenReader('Attached photo removed.');
+  }
+
+  /**
+   * Construct and launch WhatsApp emergency dispatch URL.
+   * @param {string} customMessage
+   */
+  function launchWhatsAppDispatch(customMessage) {
+    const waUrl = `https://wa.me/${EMERGENCY_PHONE}?text=${encodeURIComponent(customMessage)}`;
+    window.open(waUrl, '_blank');
   }
 
   /**
@@ -702,15 +764,6 @@
       elements.analyzeSubmitBtn.disabled = false;
       elements.aiLoadingContainer.classList.add('hidden');
     }
-  }
-
-  /**
-   * Construct and launch WhatsApp emergency dispatch URL.
-   * @param {string} customMessage
-   */
-  function launchWhatsAppDispatch(customMessage) {
-    const waUrl = `https://wa.me/${EMERGENCY_PHONE}?text=${encodeURIComponent(customMessage)}`;
-    window.open(waUrl, '_blank');
   }
 
   /**
@@ -1007,7 +1060,7 @@ Please deploy campus security, EMS, and first responders to this location immedi
       });
     });
 
-    // Hazard Photo Input
+    // Hazard Photo Input with auto canvas compression
     if (elements.hazardImageInput) {
       elements.hazardImageInput.addEventListener('change', handleImageUpload);
     }

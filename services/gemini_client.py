@@ -2,39 +2,22 @@
 
 import asyncio
 import base64
-import os
-import traceback
+import logging
 from typing import Any, List, Optional
 from google import genai
 from google.genai import types
+from core.config import get_settings
 from models.schemas import IncidentReport, SafetyProtocol
+
+logger = logging.getLogger(__name__)
 
 AI_MODEL_NAME = "gemini-3.7-flash"
 REQUEST_TIMEOUT_SECONDS = 10.0
 
-
-def _load_env_fallback() -> None:
-    """Load environment variables from .env file if not already present in os.environ."""
-    env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
-    if os.path.exists(env_path):
-        try:
-            with open(env_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    stripped = line.strip()
-                    if stripped and not stripped.startswith("#") and "=" in stripped:
-                        key, val = stripped.split("=", 1)
-                        key = key.strip()
-                        val = val.strip().strip("'\"")
-                        if key and key not in os.environ:
-                            os.environ[key] = val
-        except Exception:
-            pass
-
-
-_load_env_fallback()
+settings = get_settings()
 
 # Initialize client once at module level using environment variable with fallback for test imports
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY") or "PLACEHOLDER_KEY")
+client = genai.Client(api_key=settings.GEMINI_API_KEY or "PLACEHOLDER_KEY")
 
 FALLBACK_SAFETY_PROTOCOL = SafetyProtocol(
     severity_level="High",
@@ -71,7 +54,8 @@ def _extract_image_part(image_base64: str) -> Optional[types.Part]:
             mime_type = header.replace("data:", "").strip() or "image/jpeg"
         image_bytes = base64.b64decode(data_str)
         return types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
-    except Exception:
+    except Exception as exc:
+        logger.warning("Failed to decode base64 image input: %s", exc)
         return None
 
 
@@ -116,6 +100,6 @@ async def analyze_hazard(report: IncidentReport) -> SafetyProtocol:
             return SafetyProtocol.model_validate_json(cleaned_json)
 
         return FALLBACK_SAFETY_PROTOCOL
-    except Exception:
-        traceback.print_exc()
+    except Exception as exc:
+        logger.error("Gemini hazard analysis encountered an exception: %s", exc, exc_info=True)
         return FALLBACK_SAFETY_PROTOCOL

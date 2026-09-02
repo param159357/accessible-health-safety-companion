@@ -48,7 +48,7 @@ def test_sos_alert_bad_input_exceeded_max_length() -> None:
 
 def test_sos_alert_server_failure_500() -> None:
     """Verify that internal dispatch exceptions trigger a generic 500 error without stack traces."""
-    with patch("main.dispatch_emergency_alert", side_effect=RuntimeError("Dispatch gateway failure")):
+    with patch("routers.sos_router.dispatch_emergency_alert", side_effect=RuntimeError("Dispatch gateway failure")):
         payload = {
             "hazard_type": "Medical Emergency",
             "location": "Library 2nd Floor",
