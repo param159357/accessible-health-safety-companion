@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Accessible Multimodal Health & Safety Companion for campus emergencies, rapid first-aid protocols, multimodal AI hazard analysis, and SOS dispatch.">
+  <title>Accessible Multimodal Health & Safety Companion</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="/css/style.css">
+  
+  <!-- External Libraries with Defer -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+  <!-- Decorative WebGL Canvas -->
+  <canvas id="bg-canvas" aria-hidden="true" tabindex="-1"></canvas>
+
+  <!-- Live Announcer for Screen Readers -->
+  <div id="sr-announcements" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Main Application Wrapper -->
+  <div class="app-container">
+    <header class="app-header" role="banner">
+      <div class="header-inner">
+        <div class="brand-group">
+          <div class="brand-icon" aria-hidden="true">🛡️</div>
+          <div>
+            <h1 class="brand-title" data-i18n="brand_title">Accessible Multimodal Health & Safety Companion</h1>
+            <p class="brand-subtitle" data-i18n="brand_subtitle">Rapid First-Aid Protocols & Campus Emergency Dispatch</p>
+          </div>
+        </div>
+
+        <nav class="header-nav" aria-label="Global Language and Quick Navigation">
+          <div class="language-picker-group">
+            <label for="language-select" class="language-label">
+              <span class="lang-icon" aria-hidden="true">🌐</span>
+              <span id="lang-select-label-text" data-i18n="lang_label">Select Language:</span>
+            </label>
+            <select id="language-select" class="language-select" aria-describedby="lang-desc">
+              <option value="English" selected>English</option>
+              <option value="Hindi">हिन्दी (Hindi)</option>
+              <option value="Bengali">বাংলা (Bengali)</option>
+              <option value="Marathi">मराठी (Marathi)</option>
+              <option value="Telugu">తెలుగు (Telugu)</option>
+              <option value="Tamil">தமிழ் (Tamil)</option>
+              <option value="Gujarati">ગુજરાતી (Gujarati)</option>
+            </select>
+            <span id="lang-desc" class="sr-only">Translates emergency guidance and hazard warnings into your chosen language.</span>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main-content" class="app-main" role="main">
+      
+      <!-- Top Priority: Emergency SOS Dispatch Trigger Section -->
+      <section id="sos-section" class="card sos-card" aria-labelledby="sos-section-title">
+        <div class="sos-card-inner">
+          <div class="sos-info">
+            <div class="sos-tag" data-i18n="sos_tag" aria-hidden="true">🚨 IMMEDIATE ASSISTANCE</div>
+            <h2 id="sos-section-title" class="sos-title" data-i18n="sos_title">Campus Emergency SOS Dispatch</h2>
+            <p class="sos-desc" data-i18n="sos_desc">Direct line to Campus Security, EMS, and First Responders. Use when immediate on-site response is required.</p>
+          </div>
+          
+          <div class="sos-action-box">
+            <div class="sos-location-input-group">
+              <label for="sos-location-input" class="form-label">
+                <span data-i18n="sos_location_label">Emergency Location:</span>
+                <span class="required-indicator" aria-hidden="true">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="sos-location-input" 
+                class="form-input" 
+                data-i18n-placeholder="sos_location_placeholder"
+                placeholder="e.g., Chemistry Hall Room 302 or Main Library" 
+                value="Main Campus Complex - Zone A"
+                maxlength="200" 
+                required
+              >
+            </div>
+
+            <button 
+              type="button" 
+              id="sos-trigger-btn" 
+              class="sos-button" 
+              aria-label="Trigger Campus Emergency SOS Dispatch"
+            >
+              <span class="sos-pulse" aria-hidden="true"></span>
+              <span class="sos-icon" aria-hidden="true">🆘</span>
+              <span class="sos-button-text" data-i18n="sos_btn_text">DISPATCH SOS ALERT</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SOS Result Confirmation Container -->
+        <div id="sos-result-container" class="sos-result-container hidden" aria-live="assertive" role="region" aria-label="SOS Dispatch Confirmation">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </section>
+
+      <!-- Section 1: Quick Help Grid (Zero-Latency Local First-Aid) -->
+      <section id="quick-help-section" class="card quick-help-card" aria-labelledby="quick-help-title">
+        <div class="section-header">
+          <div class="section-icon" aria-hidden="true">⚡</div>
+          <div>
+            <h2 id="quick-help-title" class="section-title" data-i18n="quick_help_title">Instant Quick-Help First-Aid Protocols</h2>
+            <p class="section-subtitle" data-i18n="quick_help_subtitle">Zero-latency, verified emergency steps for immediate campus hazards. Select an emergency below:</p>
+          </div>
+        </div>
+
+        <!-- Quick Help Buttons Grid -->
+        <div class="quick-help-grid" role="group" aria-label="Emergency First-Aid Categories">
+          <button type="button" class="protocol-btn" id="btn-cuts_bleeding" data-protocol-id="cuts_bleeding" aria-expanded="false" aria-controls="protocol-viewer">
+            <span class="btn-emoji" aria-hidden="true">🩸</span>
+            <span class="btn-label-wrap">
+              <strong class="btn-name" data-i18n="btn_cuts_name">Cuts & Bleeding</strong>
+              <span class="btn-desc" data-i18n="btn_cuts_desc">Hemorrhage control</span>
+            </span>
+          </button>
+
+          <button type="button" class="protocol-btn" id="btn-thermal_burns" data-protocol-id="thermal_burns" aria-expanded="false" aria-controls="protocol-viewer">
+            <span class="btn-emoji" aria-hidden="true">🔥</span>
+            <span class="btn-label-wrap">
+              <strong class="btn-name" data-i18n="btn_burns_name">Thermal Burns</strong>
+              <span class="btn-desc" data-i18n="btn_burns_desc">Cool water protocol</span>
+            </span>
+          </button>
+
+          <button type="button" class="protocol-btn" id="btn-chemical_exposure" data-protocol-id="chemical_exposure" aria-expanded="false" aria-controls="protocol-viewer">
+            <span class="btn-emoji" aria-hidden="true">🧪</span>
+            <span class="btn-label-wrap">
+              <strong class="btn-name" data-i18n="btn_chem_name">Chemical Exposure</strong>
+              <span class="btn-desc" data-i18n="btn_chem_desc">Flush & decontamination</span>
+            </span>
+          </button>
+
+          <button type="button" class="protocol-btn" id="btn-electric_shock" data-protocol-id="electric_shock" aria-expanded="false" aria-controls="protocol-viewer">
+            <span class="btn-emoji" aria-hidden="true">⚡</span>
+            <span class="btn-label-wrap">
+              <strong class="btn-name" data-i18n="btn_shock_name">Electric Shock</strong>
+              <span class="btn-desc" data-i18n="btn_shock_desc">Power cutoff & CPR triage</span>
+            </span>
+          </button>
+
+          <button type="button" class="protocol-btn" id="btn-fainting_syncope" data-protocol-id="fainting_syncope" aria-expanded="false" aria-controls="protocol-viewer">
+            <span class="btn-emoji" aria-hidden="true">💫</span>
+            <span class="btn-label-wrap">
+              <strong class="btn-name" data-i18n="btn_faint_name">Fainting & Syncope</strong>
+              <span class="btn-desc" data-i18n="btn_faint_desc">Elevation & recovery</span>
+            </span>
+          </button>
+        </div>
+
+        <!-- Protocol Detailed Display Box -->
+        <div id="protocol-viewer" class="protocol-viewer-box" aria-live="polite" role="region" aria-label="Selected Protocol Details">
+          <div class="protocol-placeholder" id="protocol-placeholder-text">
+            <p data-i18n="protocol_placeholder">Select any emergency button above to load instant, step-by-step first-aid protocols with safety precautions.</p>
+          </div>
+          <div id="protocol-content" class="protocol-content hidden">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: AI Multimodal Hazard Assistant -->
+      <section id="ai-assistant-section" class="card ai-card" aria-labelledby="ai-assistant-title">
+        <div class="section-header">
+          <div class="section-icon" aria-hidden="true">🤖</div>
+          <div>
+            <h2 id="ai-assistant-title" class="section-title" data-i18n="ai_title">Multimodal AI Hazard Assessment</h2>
+          </div>
+        </div>
+
+        <form id="hazard-form" class="hazard-form" novalidate>
+          <fieldset class="form-fieldset">
+            <legend class="form-legend" data-i18n="form_legend">Emergency Incident Details</legend>
+
+            <!-- Text Description Input -->
+            <div class="form-group">
+              <label for="hazard-description" class="form-label">
+                <span data-i18n="desc_label">Incident Description:</span>
+                <span class="optional-indicator" data-i18n="desc_optional">(Optional if photo attached)</span>
+              </label>
+              <textarea 
+                id="hazard-description" 
+                class="form-textarea" 
+                rows="3" 
+                maxlength="5000"
+                data-i18n-placeholder="desc_placeholder"
+                placeholder="e.g., Worker splashed with clear liquid in Battery Lab 104, experiencing skin irritation..."
+              ></textarea>
+            </div>
+
+            <!-- Multimodal Image Upload / Camera Input -->
+            <div class="form-group">
+              <label for="hazard-image-input" class="form-label">
+                <span data-i18n="photo_label">Hazard Photo Upload:</span>
+                <span class="optional-indicator" data-i18n="photo_optional">(PNG, JPEG, WebP - max 10MB)</span>
+              </label>
+              <div class="image-upload-wrapper">
+                <input 
+                  type="file" 
+                  id="hazard-image-input" 
+                  class="file-input" 
+                  accept="image/png, image/jpeg, image/webp"
+                  capture="environment"
+                >
+                <div id="image-preview-wrapper" class="image-preview-wrapper hidden">
+                  <img id="image-preview" class="image-preview-thumb" src="" alt="Uploaded hazard preview" />
+                  <button type="button" id="remove-image-btn" class="remove-image-btn" data-i18n="remove_photo" aria-label="Remove uploaded hazard image">Remove Photo</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Button and Loading State -->
+            <div class="form-actions">
+              <button type="submit" id="analyze-submit-btn" class="submit-button">
+                <span class="btn-text" data-i18n="analyze_btn">Analyze Hazard & Generate Protocol</span>
+                <span class="btn-spinner hidden" id="form-spinner" aria-hidden="true"></span>
+              </button>
+            </div>
+          </fieldset>
+        </form>
+
+        <!-- Loading Announcer & Progress -->
+        <div id="ai-loading-container" class="loading-state-box hidden" aria-live="polite">
+          <div class="spinner-ring" aria-hidden="true"></div>
+          <p class="loading-text" data-i18n="loading_text">Analyzing multimodal hazard evidence and generating structured protocols with Gemini...</p>
+        </div>
+
+        <!-- AI Protocol Output Container -->
+        <div id="ai-result-container" class="ai-result-container hidden" aria-live="polite" role="region" aria-label="AI Hazard Assessment Results">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="app-footer" role="contentinfo">
+      <div class="footer-inner">
+        <p class="footer-copy" data-i18n="footer_copy">
+          <strong>Campus Health & Safety System</strong> &bull; Accessible Multimodal First-Aid Companion &bull; Built for Rapid Emergency Response
+        </p>
+        <p class="footer-disclaimer" data-i18n="footer_disclaimer">
+          Emergency Disclaimer: This companion simulates triage and provides automated guidance. In life-threatening emergencies, always notify emergency services directly.
+        </p>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
